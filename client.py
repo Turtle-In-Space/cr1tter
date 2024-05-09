@@ -2,7 +2,6 @@ import socket
 import os
 import subprocess
 import sys
-import tqdm
 
 SERVER_HOST = sys.argv[1]
 SERVER_PORT = 5003
@@ -12,7 +11,6 @@ SEPARATOR = "<sep>"
 
 def cr_SendFile(filename: str):
     filesize = os.path.getsize(filename)
-    progress = tqdm.tqdm(range(filesize), desc=f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     s.send(f"{filename}{SEPARATOR}{filesize}".encode())
     with open(filename, "rb") as f:
         while True:
@@ -20,7 +18,6 @@ def cr_SendFile(filename: str):
             if not bytes_read:
                 break
             s.sendall(bytes_read)
-            progress.update(len(bytes_read))
 
 
 s = socket.socket()

