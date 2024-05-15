@@ -8,8 +8,7 @@ from tqdm import tqdm
 #   Camera
 #   Send files to specifed dir
 #   download files
-# Hide evidence
-# handle "cd " crash
+# Hide evidence (what did i mean?)
 # Exe file
 
 #Server vars
